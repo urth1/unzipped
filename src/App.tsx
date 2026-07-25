@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas, FabricImage, Textbox } from 'fabric';
 import { supabase } from './supabaseClient';
-
+import { BagDetailModal } from './components/BagDetailModal';
 
 // @ts-ignore
 import './App.css';
@@ -31,6 +31,9 @@ export default function App() {
   const [bagTitle, setBagTitle] = useState("enter the name of your makeup bag");
   const [currentBagId, setCurrentBagId] = useState<string | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+
+  // Modal State for Up-Close View, Likes & Comments
+  const [selectedBag, setSelectedBag] = useState<any>(null);
 
   // Auth State
   const [user, setUser] = useState<any>(null);
@@ -601,10 +604,10 @@ export default function App() {
               {feedBags.map((bag, index) => {
                 const isAdInsertPosition = (index + 1) % 3 === 0;
                 const authorName = bag.profiles?.username || 'username';
-
                 return (
                   <React.Fragment key={bag.id}>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
+
                       {/* USERNAME LINK ABOVE CARD */}
                       <span
                         onClick={() => openUserProfile(bag.user_id || '', authorName)}
@@ -621,14 +624,9 @@ export default function App() {
                         @{authorName}
                       </span>
 
-                      {/* BAG CARD */}
+                      {/* BAG CARD - Clicking opens the up-close BagDetailModal */}
                       <div
-                        onClick={() => {
-                          setBagTitle(bag.title);
-                          setCurrentBagId(bag.id);
-                          setPendingLoadJson(bag.canvas_json);
-                          setCurrentView('editor');
-                        }}
+                        onClick={() => setSelectedBag(bag)}
                         style={{
                           backgroundColor: 'var(--bg-cream)',
                           color: 'var(--text-blue)',
@@ -930,6 +928,13 @@ export default function App() {
           </button>
         </div>
       )}
+
+      {/* UP-CLOSE BAG DETAIL MODAL (LIKES & COMMENTS) */}
+      <BagDetailModal
+        bag={selectedBag}
+        onClose={() => setSelectedBag(null)}
+        currentUserId={user?.email || 'Anonymous Creator'}
+      />
     </div>
   );
 }
