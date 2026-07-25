@@ -5,8 +5,12 @@ import { supabase } from '../supabaseClient';
 interface BagItem {
   id: string;
   title: string;
-  creator_name: string;
+  user_id?: string;
+  creator_name?: string;
   canvas_json: string;
+  profiles?: {
+    username: string;
+  };
 }
 
 interface CommentItem {
@@ -19,7 +23,7 @@ interface CommentItem {
 interface BagDetailModalProps {
   bag: BagItem | null;
   onClose: () => void;
-  currentUserId?: string; // Pass the logged-in user's ID/name if available
+  currentUserId?: string;
 }
 
 export const BagDetailModal: React.FC<BagDetailModalProps> = ({ 
@@ -38,14 +42,14 @@ export const BagDetailModal: React.FC<BagDetailModalProps> = ({
   useEffect(() => {
     if (!bag) return;
 
-    // Fetch likes and comments for this specific bag
     fetchEngagementData();
 
     if (!canvasRef.current) return;
 
     const canvas = new fabric.Canvas(canvasRef.current, {
-      width: 350,
-      height: 450,
+      width: 380,
+      height: 480,
+      backgroundColor: '#FCFBF0',
       interactive: false,
     });
 
@@ -87,7 +91,7 @@ export const BagDetailModal: React.FC<BagDetailModalProps> = ({
       setLikesCount(count);
     }
 
-    // 2. Check if current user has liked it
+    // 2. Check if current user liked it
     const { data: userLike, error: userLikeError } = await supabase
       .from('likes')
       .select('*')
@@ -117,7 +121,6 @@ export const BagDetailModal: React.FC<BagDetailModalProps> = ({
     if (!bag) return;
 
     if (hasLiked) {
-      // Unlike
       await supabase
         .from('likes')
         .delete()
@@ -127,7 +130,6 @@ export const BagDetailModal: React.FC<BagDetailModalProps> = ({
       setHasLiked(false);
       setLikesCount((prev) => Math.max(0, prev - 1));
     } else {
-      // Like
       await supabase
         .from('likes')
         .insert([{ bag_id: bag.id, user_id: currentUserId }]);
@@ -160,76 +162,141 @@ export const BagDetailModal: React.FC<BagDetailModalProps> = ({
 
   if (!bag) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl flex flex-col md:flex-row gap-6">
-        
-        {/* Left Column: Canvas Preview */}
-        <div className="flex flex-col items-center justify-center bg-gray-50 rounded-xl border p-4">
-          <h3 className="text-lg font-bold text-gray-900 mb-2">{bag.title}</h3>
-          <p className="text-xs text-gray-500 mb-4">Designed by {bag.creator_name}</p>
-          <canvas ref={canvasRef} />
-          
-          {/* Like Button */}
-          <button
-            onClick={handleToggleLike}
-            className={`mt-4 flex items-center gap-2 px-4 py-2 rounded-full font-medium transition ${
-              hasLiked 
-                ? 'bg-rose-50 text-rose-600 border border-rose-200' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            <span>{hasLiked ? '❤️' : '🤍'}</span>
-            <span>{likesCount} {likesCount === 1 ? 'Like' : 'Likes'}</span>
-          </button>
-        </div>
+  const authorName = bag.profiles?.username || bag.creator_name || 'username';
 
-        {/* Right Column: Comments Section */}
-        <div className="flex-1 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-3 border-b mb-4">
-              <h4 className="font-semibold text-gray-800">Discussion ({comments.length})</h4>
-              <button
-                onClick={onClose}
-                className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
-              >
-                ✕
-              </button>
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'var(--bg-royal, #1239A0)',
+      zIndex: 1000,
+      overflowY: 'auto',
+      padding: '40px 32px',
+      color: '#FCFBF0',
+      boxSizing: 'border-box'
+    }}>
+      {/* Top Header matching Feed view */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
+        <div>
+          <h2 style={{ fontSize: '2.5rem', fontStyle: 'italic', margin: '0 0 4px 0' }}>unzipped</h2>
+          <p style={{ fontSize: '1.2rem', margin: 0, fontStyle: 'italic', opacity: 0.9 }}>feed:</p>
+        </div>
+        <button
+          onClick={onClose}
+          style={{ background: 'none', border: '1px solid #FCFBF0', color: '#FCFBF0', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontStyle: 'italic' }}
+        >
+          ← back to feed
+        </button>
+      </div>
+
+      {/* Main Split Layout matching Mockup */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '48px', alignItems: 'flex-start', maxWidth: '1100px', margin: '0 auto' }}>
+        
+        {/* Left Column: Author, Likes, Comments */}
+        <div style={{ flex: '1', minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
+          {/* Author Handle */}
+          <h3 style={{ fontSize: '2rem', fontStyle: 'italic', margin: 0 }}>
+            @{authorName}
+          </h3>
+
+          {/* Likes Section */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span style={{ fontSize: '1.2rem', fontStyle: 'italic' }}>
+              likes: {likesCount}
+            </span>
+            <button
+              onClick={handleToggleLike}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem', padding: 0 }}
+              title={hasLiked ? 'Unlike' : 'Like'}
+            >
+              {hasLiked ? '❤️' : '🤍'}
+            </button>
+          </div>
+
+          {/* Discussion / Comments Section */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(252,251,240,0.3)', paddingBottom: '8px' }}>
+              <span style={{ fontStyle: 'italic', fontSize: '1.1rem' }}>comments:</span>
             </div>
 
-            {/* Comment List */}
-            <div className="space-y-3 max-h-60 overflow-y-auto pr-2 mb-4">
+            {/* Add Comment Input Form */}
+            <form onSubmit={handleAddComment} style={{ display: 'flex', gap: '8px' }}>
+              <input
+                type="text"
+                value={newCommentText}
+                onChange={(e) => setNewCommentText(e.target.value)}
+                placeholder="comment here..."
+                style={{
+                  flex: 1,
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: '1px solid #FCFBF0',
+                  color: '#FCFBF0',
+                  padding: '6px 0',
+                  fontSize: '1rem',
+                  outline: 'none',
+                  fontFamily: 'inherit'
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  backgroundColor: '#FCFBF0',
+                  color: 'var(--text-blue, #1239A0)',
+                  border: 'none',
+                  padding: '6px 14px',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontFamily: 'inherit'
+                }}
+              >
+                Post
+              </button>
+            </form>
+
+            {/* Comments List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '250px', overflowY: 'auto', marginTop: '8px' }}>
               {comments.length === 0 ? (
-                <p className="text-sm text-gray-400 italic text-center py-8">No comments yet. Be the first to share your thoughts!</p>
+                <p style={{ fontStyle: 'italic', fontSize: '0.95rem', opacity: 0.8, margin: 0 }}>No comments yet. Be the first to share your thoughts!</p>
               ) : (
                 comments.map((comment) => (
-                  <div key={comment.id} className="bg-gray-50 p-3 rounded-lg border text-sm">
-                    <span className="font-semibold text-gray-900 block text-xs mb-1">{comment.user_id}</span>
-                    <p className="text-gray-700">{comment.content}</p>
+                  <div key={comment.id} style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <span style={{ fontStyle: 'italic', fontSize: '0.9rem', opacity: 0.9 }}>@{comment.user_id}</span>
+                    <span style={{ fontSize: '1rem', paddingLeft: '8px' }}>{comment.content}</span>
                   </div>
                 ))
               )}
             </div>
           </div>
 
-          {/* Add Comment Form */}
-          <form onSubmit={handleAddComment} className="flex gap-2 pt-3 border-t">
-            <input
-              type="text"
-              value={newCommentText}
-              onChange={(e) => setNewCommentText(e.target.value)}
-              placeholder="Add a comment..."
-              className="flex-1 px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <button
-              type="submit"
-              className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition"
-            >
-              Post
-            </button>
-          </form>
-
         </div>
+
+        {/* Right Column: Cream Bag Card Preview */}
+        <div style={{
+          backgroundColor: 'var(--bg-cream, #FCFBF0)',
+          color: 'var(--text-blue, #1239A0)',
+          borderRadius: '32px',
+          padding: '32px',
+          boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+          minWidth: '340px'
+        }}>
+          <h4 style={{ fontStyle: 'italic', fontSize: '1.5rem', margin: '0 0 20px 0' }}>
+            {bag.title}
+          </h4>
+          <div style={{ backgroundColor: '#FCFBF0', borderRadius: '16px', overflow: 'hidden' }}>
+            <canvas ref={canvasRef} />
+          </div>
+        </div>
+
       </div>
     </div>
   );
