@@ -197,7 +197,7 @@ export const BagDetailModal: React.FC<BagDetailModalProps> = ({
         <div style={{ flex: '1', minWidth: '300px', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
           <div>
-            <h3 style={{ fontSize: '2.2rem', fontStyle: 'italic', margin: '0 0 4px 0', lineHeight: 1.2 }}>
+            <h3 style={{ fontSize: '2.2rem', fontStyle: 'italic', margin: '0 0 4px 0', lineHeight: 1.2, color: '#F7DF74' }}>
               {bag.title || 'Untitled Bag'}
             </h3>
             <p style={{ fontSize: '1.1rem', fontStyle: 'italic', opacity: 0.85, margin: 0 }}>
