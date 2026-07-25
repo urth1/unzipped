@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas, FabricImage, Textbox } from 'fabric';
 import { supabase } from './supabaseClient';
+
+
+// @ts-ignore
 import './App.css';
 
 interface ProductItem {
