@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+
+:root {
+  /* "unzipped" Brand Colors */
+  --bg-cream: #FCFBF0;          /* Soft yellow/cream main background */
+  --bg-royal: #1239A0;          /* Signature royal blue feed background */
+  --text-blue: #1239A0;         /* Royal blue brand text */
+  --text-dark: #1A244D;         /* Deep espresso text */
+  --border-cream: #EAE6D8;      /* Soft borders for canvas */
+  --drawer-blue: #819CC7;       /* Muted blue sidebar drawer */
+  
+  /* Typography */
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  font: 16px/145% var(--font-sans);
+  color: var(--text-blue);
+  background-color: var(--bg-cream);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-cream);
+  min-height: 100vh;
+}
+
+#root {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* --- Brand Typography --- */
+h1, h2, h3, .unzipped-title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--text-blue);
+  margin: 0;
+}
+
+h1 {
+  font-size: 3.5rem;
+  letter-spacing: -1px;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+p {
+  font-family: var(--font-serif);
+  font-style: italic;
+  margin: 0;
+}
+
+/* --- Interactive Elements --- */
+button {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+input {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--text-dark);
+}
+
+input::placeholder {
+  color: #8f96a3;
+  font-style: italic;
+}
