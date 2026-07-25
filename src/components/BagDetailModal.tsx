@@ -46,8 +46,9 @@ export const BagDetailModal: React.FC<BagDetailModalProps> = ({
 
     if (!canvasRef.current) return;
 
+    // Match the full canvas dimensions of the creator view so nothing gets cut off
     const canvas = new fabric.Canvas(canvasRef.current, {
-      width: 380,
+      width: 620,
       height: 480,
       backgroundColor: '#FCFBF0',
       interactive: false,
@@ -81,7 +82,6 @@ export const BagDetailModal: React.FC<BagDetailModalProps> = ({
   const fetchEngagementData = async () => {
     if (!bag) return;
 
-    // 1. Get total likes count
     const { count, error: likesError } = await supabase
       .from('likes')
       .select('*', { count: 'exact', head: true })
@@ -91,7 +91,6 @@ export const BagDetailModal: React.FC<BagDetailModalProps> = ({
       setLikesCount(count);
     }
 
-    // 2. Check if current user liked it
     const { data: userLike, error: userLikeError } = await supabase
       .from('likes')
       .select('*')
@@ -105,7 +104,6 @@ export const BagDetailModal: React.FC<BagDetailModalProps> = ({
       setHasLiked(false);
     }
 
-    // 3. Fetch comments
     const { data: commentsData, error: commentsError } = await supabase
       .from('comments')
       .select('*')
@@ -178,7 +176,7 @@ export const BagDetailModal: React.FC<BagDetailModalProps> = ({
       color: '#FCFBF0',
       boxSizing: 'border-box'
     }}>
-      {/* Top Header matching Feed view */}
+      {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
         <div>
           <h2 style={{ fontSize: '2.5rem', fontStyle: 'italic', margin: '0 0 4px 0' }}>unzipped</h2>
@@ -192,18 +190,16 @@ export const BagDetailModal: React.FC<BagDetailModalProps> = ({
         </button>
       </div>
 
-      {/* Main Split Layout matching Mockup */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '48px', alignItems: 'flex-start', maxWidth: '1100px', margin: '0 auto' }}>
+      {/* Main Split Layout */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '48px', alignItems: 'flex-start', justifyContent: 'center', maxWidth: '1200px', margin: '0 auto' }}>
         
         {/* Left Column: Author, Likes, Comments */}
-        <div style={{ flex: '1', minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ flex: '1', minWidth: '300px', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
-          {/* Author Handle */}
           <h3 style={{ fontSize: '2rem', fontStyle: 'italic', margin: 0 }}>
             @{authorName}
           </h3>
 
-          {/* Likes Section */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <span style={{ fontSize: '1.2rem', fontStyle: 'italic' }}>
               likes: {likesCount}
@@ -217,13 +213,11 @@ export const BagDetailModal: React.FC<BagDetailModalProps> = ({
             </button>
           </div>
 
-          {/* Discussion / Comments Section */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '10px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(252,251,240,0.3)', paddingBottom: '8px' }}>
               <span style={{ fontStyle: 'italic', fontSize: '1.1rem' }}>comments:</span>
             </div>
 
-            {/* Add Comment Input Form */}
             <form onSubmit={handleAddComment} style={{ display: 'flex', gap: '8px' }}>
               <input
                 type="text"
@@ -259,7 +253,6 @@ export const BagDetailModal: React.FC<BagDetailModalProps> = ({
               </button>
             </form>
 
-            {/* Comments List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '250px', overflowY: 'auto', marginTop: '8px' }}>
               {comments.length === 0 ? (
                 <p style={{ fontStyle: 'italic', fontSize: '0.95rem', opacity: 0.8, margin: 0 }}>No comments yet. Be the first to share your thoughts!</p>
@@ -276,22 +269,18 @@ export const BagDetailModal: React.FC<BagDetailModalProps> = ({
 
         </div>
 
-        {/* Right Column: Cream Bag Card Preview */}
+        {/* Right Column: Full Cream Bag Card */}
         <div style={{
           backgroundColor: 'var(--bg-cream, #FCFBF0)',
           color: 'var(--text-blue, #1239A0)',
           borderRadius: '32px',
-          padding: '32px',
+          padding: '24px',
           boxShadow: '0 12px 32px rgba(0,0,0,0.3)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          textAlign: 'center',
-          minWidth: '340px'
+          overflow: 'hidden'
         }}>
-          <h4 style={{ fontStyle: 'italic', fontSize: '1.5rem', margin: '0 0 20px 0' }}>
-            {bag.title}
-          </h4>
           <div style={{ backgroundColor: '#FCFBF0', borderRadius: '16px', overflow: 'hidden' }}>
             <canvas ref={canvasRef} />
           </div>
